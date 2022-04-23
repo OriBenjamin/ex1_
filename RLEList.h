@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#define SIZE_OF_RLEList sizeof(char)+sizeof(int)+__SIZEOF_POINTER__
 /**
 * Run Length Encoding List
 *
