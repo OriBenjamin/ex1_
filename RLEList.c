@@ -39,7 +39,7 @@ void RLEListDestroy(RLEList list)
 RLEListResult RLEListAppend(RLEList list, char value)
 {
     //checking the legality of the given parameters
-    if(!list || !value)
+    if(!list)
     {
         return RLE_LIST_NULL_ARGUMENT;
     }
@@ -84,7 +84,7 @@ int RLEListSize(RLEList list)
 RLEListResult RLEListRemove(RLEList list, int index)
 {
     //checking the legality of the given parameters
-    if(!list || !index)
+    if(!list)
     {
         return RLE_LIST_NULL_ARGUMENT;
     }
@@ -112,7 +112,7 @@ RLEListResult RLEListRemove(RLEList list, int index)
 char RLEListGet(RLEList list, int index, RLEListResult *result);
 {
     //checking the legality of the given parameters
-    if(!lis || !index)
+    if(!list || !result)
     {
         *result = RLE_LIST_NULL_ARGUMENT;
         return 0;
