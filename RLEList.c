@@ -5,7 +5,7 @@ struct RLEList_t
 {
     char value;
     int sequence; //number of repetitions of the ASCII value
-    RLEList_t* next; //pointer to the next node in the list   
+    RLEList* next; //pointer to the next node in the list   
 };
 
 //implemention of functions
@@ -16,10 +16,10 @@ RLEList RLEListCreate()
     listPtr = (RLEList) malloc(SIZE_OF_RLEList);
     if(!listPtr) //did memory allocation work
     {
-        return RLE_LIST_OUT_OF_MEMORY;
+        return NULL;
     }
     //reset struct
-    listPtr->value = NULL;
+    listPtr->value = '';
     listPtr->sequence = 0;
     listPtr->next = NULL;
     return listPtr;
@@ -27,7 +27,7 @@ RLEList RLEListCreate()
 
 void RLEListDestroy(RLEList list)
 {
-    RLEList nextNode = list;
+    RLEList *nextNode = list;
     while(nextNode->next) 
     {
         nextNode = nextNode->next;
@@ -44,25 +44,26 @@ RLEListResult RLEListAppend(RLEList list, char value)
     {
         return RLE_LIST_NULL_ARGUMENT;
     }
-    RLEList currentNode = list->next;
-    while(currentNode->next) //find the final node in the list 
+    RLEList *currentNode = list;
+    while(*currentNode->next) //find the final node in the list 
     {
         currentNode = currentNode->next;
     }
     //update the final node (or create one) according to the given value
-    if(currentNode->value == value)
+    if(*currentNode->value == value)
     {
-        currentNode->sequence++;
+        *currentNode->sequence++;
         return RLE_LIST_SUCCESS;
     }
     RLEList newNode;
-    newNode = (RLEList) malloc(SIZE_OF_RLEList))
+    newNode = (RLEList)malloc(SIZE_OF_RLEList);
     if(!newNode) //did memory allocation work
     {
         return RLE_LIST_OUT_OF_MEMORY;
     } 
     newNode->value = value;
-    currentNode->next = newNode;
+    newNode->sequence++;
+    *currentNode->next = newNode;
     return RLE_LIST_SUCCESS;
 }
 
@@ -74,10 +75,11 @@ int RLEListSize(RLEList list)
     }
     int counter = 0;
     //going through each node and add to counter its sequence
-    while(list) 
+    RLEList *currentNode = list;
+    while(*currentNode) 
     {
-        counter += list->sequence;
-        list = list->next;
+        counter += *currentNode->sequence;
+        currentNode = *currentNode->next;
     }
     return counter;
 }
@@ -94,23 +96,23 @@ RLEListResult RLEListRemove(RLEList list, int index)
         return RLE_LIST_INDEX_OUT_OF_BOUNDS;
     }
     //find the node at which the character with the given index is
-    RLEList currentNode = list;
-    RLEList previousNode = list;
-    while(index - currentNode->sequence > 0)
+    RLEList *currentNode = list;
+    RLEList *previousNode = list;
+    while(index - *currentNode->sequence > 0)
     {
-        index -= currentNode->sequence;
+        index -= *currentNode->sequence;
         previousNode = currentNode;
-        currentNode = currentNode->next;
+        currentNode = *currentNode->next;
     }
-    currentNode->sequence--;
-    if(!currentNode->sequence)//the node which the value had removed from is empty
+    *currentNode->sequence--;
+    if(!*currentNode->sequence)//the node which the value had removed from is empty
     {
-        previousNode->next = currentNode->next;
+        *previousNode->next = *currentNode->next;
     }
     return RLE_LIST_SUCCESS;
 }
 
-char RLEListGet(RLEList list, int index, RLEListResult *result);
+char RLEListGet(RLEList list, int index, RLEListResult *result)
 {
     //checking the legality of the given parameters
     if(!list || !result)
@@ -124,13 +126,13 @@ char RLEListGet(RLEList list, int index, RLEListResult *result);
         return 0;
     }
     //find the node at which the character with the given index is
-    RLEList currentNode = list;
-    while(index - currentNode->sequence > 0)
+    RLEList *currentNode = list;
+    while(index - *currentNode->sequence > 0)
     {
-        index -= currentNode->sequence;
-        currentNode = currentNode->next;
+        index -= *currentNode->sequence;
+        currentNode = *currentNode->next;
     }
-    return currentNode->value;
+    return *currentNode->value;
 }
 
 RLEListResult RLEListMap(RLEList list, MapFunction map_function)
@@ -141,11 +143,11 @@ RLEListResult RLEListMap(RLEList list, MapFunction map_function)
         return RLE_LIST_NULL_ARGUMENT;
     }
     //activating map_funstion on each node value
-    RLEList currentNode = list;
-    while(currentNode)
+    RLEList *currentNode = list;
+    while(*currentNode)
     {
-        currentNode->value = *map_function(currentNode->value);
-        currentNode = currentNode->next;
+        *currentNode->value = map_function(*currentNode->value);
+        currentNode = *currentNode->next;
     }
     return RLE_LIST_SUCCESS;
 }
@@ -156,28 +158,37 @@ char* RLEListExportToString(RLEList list, RLEListResult* result)
     if(!list) 
     {
         *result = RLE_LIST_NULL_ARGUMENT; 
-        return NULL;  //NULL if list is NULL
+        return NULL;  //if list is NULL
     }
-    int stringSize = RLEListSize(list)*3*sizeof(char);
-    char* string = (char*)malloc(stringSize+1);
+    RLEList *currentNode = list;
+    int nodesNumber = 0;
+    while(*currentNode)
+    {
+        nodesNumber ++;
+        currentNode = *currentNode->next;
+    }
+    int stringSize = nodesNumber*3*sizeof(char);
+    char *RLEListString = (char*)malloc(stringSize);
     if(string == NULL) //did memory allocation work
     {
         *result = RLE_LIST_ERROR;
         return NULL;
     }
     //creating RLE string which represent the given list
-    char* current = string;
-    while(list) 
+    int index = 0;
+    currentNode = list;
+    while(index < stringSize)
     {
-        *current = list->value;
-        current++;
-        *current = list->sequence;
-        current++;
-        *current = '\n';
-        current++;
-        list = list->next;
+        RLEListString[index] = *currentNode->value;
+        index++;
+        RLEListString[index] = *currentNode->sequence;
+        index++;
+        RLEListString[index] = '\n';
+        index++;
+        currentNode = *currentNode->next;
     }
+    RLEListString[index-1] = '\0';
     *result = RLE_LIST_SUCCESS;
-    return string;
+    return RLEListString;
 }
 

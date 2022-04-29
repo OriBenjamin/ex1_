@@ -18,7 +18,7 @@ RLEList asciiArtRead(FILE* in_stream)
    return asciiList;
 }
 
-RLEListResult asciiArtPrint(RLEList list, FILE *out_stream);
+RLEListResult asciiArtPrint(RLEList list, FILE *out_stream)
 {
     if(list==NULL || out_stream==NULL)
     {
