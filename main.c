@@ -28,6 +28,7 @@ int main(int argc, char** argv)
         if(RLEOperationsResult != RLE_LIST_SUCCESS)
         {
             RLEListDestroy(asciiRLEList);
+            fclose(sourceFileName);
             return RLEOperationsResult;
         }
     }
@@ -37,10 +38,12 @@ int main(int argc, char** argv)
         if(RLEOperationsResult != RLE_LIST_SUCCES)
         {
             RLEListDestroy(asciiRLEList);
+            fclose(sourceFileName);
             return RLEOperationsResult;
         }
         asciiArtPrint(asciiRLEList,targetFile);
     }
     RLEListDestroy(asciiRLEList);
+    fclose(sourceFileName);
     return RLEOperationsResult;
 }
