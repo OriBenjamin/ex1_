@@ -19,7 +19,7 @@ RLEList RLEListCreate()
         return NULL;
     }
     //reset struct
-    listPtr->value = '';
+    listPtr->value = '\0';
     listPtr->sequence = 0;
     listPtr->next = NULL;
     return listPtr;
@@ -27,7 +27,7 @@ RLEList RLEListCreate()
 
 void RLEListDestroy(RLEList list)
 {
-    RLEList *nextNode = list;
+    RLEList nextNode = list;
     while(nextNode->next) 
     {
         nextNode = nextNode->next;
