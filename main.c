@@ -22,8 +22,9 @@ int main(int argc, char** argv)
     const char* sourceFileName = *(argv+2);
     char* targetFileName = *(argv+3);
     RLEListResult RLEOperationsResult = RLE_LIST_ERROR; //temporary value for RLEOperationsResult
-    FILE* sourceFile = fopen(sourceFileName,'r');
-    FILE* targetFile = fopen(targetFileName,'w');
+    const char readFlag = 'r', writeFlag = 'w';
+    FILE* sourceFile = fopen(sourceFileName,&readFlag);
+    FILE* targetFile = fopen(targetFileName,&writeFlag);
     RLEList asciiRLEList = asciiArtRead(sourceFile);
     if(flagKind=='e')
     {
@@ -31,7 +32,7 @@ int main(int argc, char** argv)
         if(RLEOperationsResult != RLE_LIST_SUCCESS)
         {
             RLEListDestroy(asciiRLEList);
-            fclose(sourceFileName);
+            fclose(sourceFile);
             return RLEOperationsResult;
         }
     }
@@ -41,12 +42,12 @@ int main(int argc, char** argv)
         if(RLEOperationsResult != RLE_LIST_SUCCESS)
         {
             RLEListDestroy(asciiRLEList);
-            fclose(sourceFileName);
+            fclose(sourceFile);
             return RLEOperationsResult;
         }
         asciiArtPrint(asciiRLEList,targetFile);
     }
     RLEListDestroy(asciiRLEList);
-    fclose(sourceFileName);
+    fclose(sourceFile);
     return RLEOperationsResult;
 }
