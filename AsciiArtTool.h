@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include "RLEList.h"
 
 RLEList asciiArtRead(FILE* in_stream);
 
