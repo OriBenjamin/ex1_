@@ -1,0 +1,27 @@
+==30091== Memcheck, a memory error detector
+==30091== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==30091== Using Valgrind-3.15.0 and LibVEX; rerun with -h for copyright info
+==30091== Command: ./AsciiArtTool -i ../InOutFiles/test121.in ../InOutFiles/test121v.out
+==30091== Parent PID: 18364
+==30091== 
+==30091== 
+==30091== Process terminating with default action of signal 2 (SIGINT)
+==30091==    at 0x400B0D: RLEListGet (in /home/ori.dekel/ex1_/Script/AsciiArtTool)
+==30091==    by 0x400ED9: asciiArtPrint (in /home/ori.dekel/ex1_/Script/AsciiArtTool)
+==30091==    by 0x401129: main (in /home/ori.dekel/ex1_/Script/AsciiArtTool)
+==30091== 
+==30091== HEAP SUMMARY:
+==30091==     in use at exit: 812,623 bytes in 8,560 blocks
+==30091==   total heap usage: 8,560 allocs, 0 frees, 812,623 bytes allocated
+==30091== 
+==30091== LEAK SUMMARY:
+==30091==    definitely lost: 0 bytes in 0 blocks
+==30091==    indirectly lost: 0 bytes in 0 blocks
+==30091==      possibly lost: 0 bytes in 0 blocks
+==30091==    still reachable: 812,623 bytes in 8,560 blocks
+==30091==         suppressed: 0 bytes in 0 blocks
+==30091== Reachable blocks (those to which a pointer was found) are not shown.
+==30091== To see them, rerun with: --leak-check=full --show-leak-kinds=all
+==30091== 
+==30091== For lists of detected and suppressed errors, rerun with: -s
+==30091== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
