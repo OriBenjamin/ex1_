@@ -1,6 +1,10 @@
 #include "RLEList.h"
 #include <stdlib.h>
 
+#define POINTER_SIZE 8
+#define SIZE_OF_RLEList sizeof(char)+sizeof(int)+POINTER_SIZE
+#define LIST_IS_NULL -1
+
 struct RLEList_t
 {
     RLEList next; //pointer to the next node in the list   
@@ -12,16 +16,13 @@ struct RLEList_t
 
 RLEList RLEListCreate()
 {
-    
     RLEList listPtr;
     listPtr = (RLEList) malloc(SIZE_OF_RLEList);
-    //printf("'%zu, %zu, %zu'\n",sizeof(*listPtr),sizeof(int),sizeof(char));
-    //SIZE_OF_RLEList
     if(!listPtr) //did memory allocation work
     {
         return NULL;
     }
-    //reset struct
+    //reset the new struct
     listPtr->value = '\0';
     listPtr->sequence = 0;
     listPtr->next = NULL;
@@ -30,7 +31,7 @@ RLEList RLEListCreate()
 
 void RLEListDestroy(RLEList list)
 {
-    if(!list)
+    if(!list) //checking the legality of the given parameters
     {
         return;
     }
@@ -38,26 +39,25 @@ void RLEListDestroy(RLEList list)
     while(nextNode->next) 
     {
         nextNode = nextNode->next;
-        free(list);
+        free(list); //delete the previous node
         list = nextNode; //initial list to current node
     }
-    free(list);
+    free(list); //delete last node
 }
 
 RLEListResult RLEListAppend(RLEList list, char value)
 {
-    if(!list||value=='\0')
+    if(!list || value =='\0') //checking the legality of the given parameters
     {
         return RLE_LIST_NULL_ARGUMENT;
     }
-    if(list->value=='\0') //initializing the first node
+    if(list->value =='\0') //initializing the first node
     {
         list->value = value;
         list->sequence++;
         return RLE_LIST_SUCCESS;
     }
     RLEList currentNode = list;
-
     while(currentNode->next) //find the final node in the list 
     {
         currentNode = currentNode->next;
@@ -68,7 +68,6 @@ RLEListResult RLEListAppend(RLEList list, char value)
         (currentNode->sequence)++;
         return RLE_LIST_SUCCESS;
     }
-
     RLEList newNode = RLEListCreate();
     if(!newNode) //did memory allocation work
     {
@@ -108,7 +107,7 @@ RLEListResult RLEListRemove(RLEList list, int index)
     {
         return RLE_LIST_INDEX_OUT_OF_BOUNDS;
     }
-    //find the node at which the character with the given index is
+    //find the node at which the character with the given index is placing
     RLEList currentNode = list;
     RLEList previousNode = list;
     while((index+1) - currentNode->sequence > 0)
@@ -121,19 +120,22 @@ RLEListResult RLEListRemove(RLEList list, int index)
     RLEList temporaryNext = NULL;
     if(!currentNode->sequence)//the node which the value had removed from is empty
     {
-        if(currentNode == previousNode) //if removed node is at the beginning of list
+        if(currentNode == previousNode) //the removed node is at the beginning of list
         {
-            if(!currentNode->next) //only one node in list
+            if(!currentNode->next) //there is only one node in the list
             {
                 currentNode->value = '\0';
                 currentNode->sequence = 0;
                 return RLE_LIST_SUCCESS;
             }
-            while(currentNode->next) 
+            while(currentNode->next) //deleting the first node- every node gets the value of the next node
             {
                 currentNode->value = currentNode->next->value;
                 currentNode->sequence = currentNode->next->sequence;
-                if(!currentNode->next||!currentNode->next->next)
+
+                /*the next node is the last one (we have two nods)
+                or the "next next" node is the last one (3 nodes or more)*/
+                if(!currentNode->next || !currentNode->next->next)
                 {
                     free(currentNode->next);
                     currentNode->next = NULL; 
@@ -141,11 +143,14 @@ RLEListResult RLEListRemove(RLEList list, int index)
                 }
                 currentNode = currentNode->next;
             }
-        } else 
+        } 
+        else 
         {
+            //connects between the previous and next node
             previousNode->next = currentNode->next;
             free(currentNode);
-            if(previousNode->next&&previousNode->value==previousNode->next->value)
+            //after connection two nodes with the same values are one after the other 
+            if(previousNode->next && previousNode->value == previousNode->next->value)
             {
                 previousNode->sequence += previousNode->next->sequence;
                 temporaryNext = previousNode->next;
@@ -176,7 +181,7 @@ char RLEListGet(RLEList list, int index, RLEListResult *result)
         }
         return '\0';  
     }
-    //find the node at which the character with the given index is
+    //find the node at which the character with the given index is placing
     RLEList currentNode = list;
     while((index+1) - currentNode->sequence > 0)
     {
@@ -197,13 +202,14 @@ RLEListResult RLEListMap(RLEList list, MapFunction map_function)
     {
         return RLE_LIST_NULL_ARGUMENT;
     }
-    //activating map_funstion on each node value
+    //activating map_funstion on each node's value
     RLEList currentNode = list;
     RLEList temporaryNext = NULL;
     while(currentNode)
     {
         currentNode->value = map_function(currentNode->value);
-        while(currentNode->next&&currentNode->value==map_function(currentNode->next->value))
+        //after map_function two nodes with the same values are one after the other
+        while(currentNode->next && currentNode->value == map_function(currentNode->next->value))
         {
             currentNode->sequence += currentNode->next->sequence;
             temporaryNext = currentNode->next;
@@ -233,17 +239,14 @@ char* RLEListExportToString(RLEList list, RLEListResult* result)
         nodesNumber ++;
         currentNode = currentNode->next;
     }
-    
     int stringSize = 0;
     currentNode = list;
-    while(currentNode)
+    while(currentNode) //calculating the size of the exported string
     {
         stringSize += 2 + snprintf(NULL,0 ,"%d",currentNode->sequence);
-        currentNode=currentNode->next;
+        currentNode = currentNode->next;
     }
-    
     char *RLEListString = (char*)malloc(stringSize+1);
-    
     if(RLEListString == NULL) //did memory allocation work
     {
         if(result)
@@ -255,14 +258,13 @@ char* RLEListExportToString(RLEList list, RLEListResult* result)
     //creating RLE string which represents the given list
     int index = 0;
     currentNode = list;
-    
     int currentSequenceLength = 0;
     while(index < stringSize)
     {
         RLEListString[index] = currentNode->value;
         index++;
         currentSequenceLength = snprintf(NULL,0 ,"%d",currentNode->sequence);
-        snprintf(RLEListString+index,currentSequenceLength+1,"%d",currentNode->sequence);
+        snprintf(RLEListString+index, currentSequenceLength+1, "%d",currentNode->sequence);
         index+=currentSequenceLength;
         RLEListString[index] = '\n';
         index++;
